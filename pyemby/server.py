@@ -191,6 +191,21 @@ class EmbyServer(object):
         else:
             return None
 
+    def validate_server(self):
+        """Validate connection to Emby server and return the server's unique id."""
+        return self._event_loop.run_until_complete(self.async_validate_server())
+
+    async def async_validate_server(self):
+        """Validate connection to Emby server and return the server's unique id."""
+        url = '{}/System/Info'.format(self.construct_url(API_URL))
+        params = {'api_key': self._api_key}
+
+        result = await self.api_request(url, params)
+        if result is None:
+            _LOGGER.error('Unable to validate Emby server connection.')
+            return None
+        return result.get('Id')
+
     async def register(self):
         """Register library device id and get initial device list. """
         url = '{}/Sessions'.format(self.construct_url(API_URL))
